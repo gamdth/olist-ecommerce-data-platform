@@ -1,0 +1,22 @@
+SELECT
+    order_id,
+    customer_id,
+    order_status,
+
+    CAST(order_purchase_timestamp AS TIMESTAMP) AS order_purchase_timestamp,
+
+    CAST(order_approved_at AS TIMESTAMP) AS order_approved_at,
+
+    CAST(order_delivered_carrier_date AS TIMESTAMP) AS order_delivered_carrier_date,
+
+    CAST(order_delivered_customer_date AS TIMESTAMP) AS order_delivered_customer_date,
+
+    CAST(order_estimated_delivery_date AS TIMESTAMP) AS order_estimated_delivery_date,
+
+    CASE
+        WHEN order_delivered_customer_date IS NULL THEN 'Not Delivered'
+        WHEN order_delivered_customer_date > order_estimated_delivery_date THEN 'Late'
+        ELSE 'On Time'
+    END AS delivery_status
+
+FROM {{ source('raw_db', 'bronze_olist_orders') }}

@@ -1,0 +1,30 @@
+name: 'olist_dbt'
+
+profile: 'olist_dbt'
+
+version: '1.0.0'
+
+config-version: 2
+
+model-paths: ["models"]
+
+target-path: "target"
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  olist_dbt:
+
+    silver:
+      +schema: silver
+      +materialized: view
+
+    gold:
+      +schema: gold
+      +materialized: table
+
+    marts:
+      +schema: marts
+      +materialized: table
