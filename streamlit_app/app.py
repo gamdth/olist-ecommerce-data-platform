@@ -2,6 +2,15 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import sys
+import os
+
+# ==========================================
+# CẤU HÌNH KẾT NỐI VỚI THƯ MỤC AI
+# ==========================================
+# Thêm đường dẫn thư mục gốc để Streamlit hiểu lệnh import từ ai_prompts
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from ai_prompts.ecommerce_agent import get_coo_ai_insights
 
 # ==========================================
 # 1. Cấu hình trang & Giao diện
@@ -25,7 +34,6 @@ st.markdown("""
 # ==========================================
 # 2. Tạo dữ liệu mô phỏng (Mock Data cho Olist)
 # ==========================================
-# Dữ liệu Phương thức thanh toán (Biểu đồ tròn)
 @st.cache_data
 def get_payment_data():
     return pd.DataFrame({
@@ -33,7 +41,6 @@ def get_payment_data():
         "Giá trị (R$)": [12540000, 2860000, 950000, 480000]
     })
 
-# Dữ liệu Top 10 danh mục doanh thu cao
 @st.cache_data
 def get_top_categories():
     return pd.DataFrame({
@@ -49,10 +56,8 @@ def get_top_categories():
         "Số đơn hàng": [10500, 8400, 11200, 7800, 6900, 7200, 6100, 4500, 3900, 4100]
     })
 
-# Dữ liệu tọa độ vận chuyển tại Brazil (Bản đồ nhiệt)
 @st.cache_data
 def get_delivery_gps():
-    # Giới hạn tọa độ chủ yếu quanh các bang lớn của Brazil: São Paulo, Rio de Janeiro, Minas Gerais
     df = pd.DataFrame({
         'lat': np.random.normal(-23.55, 2.5, size=1500),
         'lon': np.random.normal(-46.63, 2.5, size=1500)
@@ -83,7 +88,6 @@ if selected_tab == "📈 Tổng quan kinh doanh":
     st.markdown("<h1 style='color:#1E3A8A;'>📈 Phân Tích Tổng Quan Kinh Doanh</h1>", unsafe_allow_html=True)
     st.markdown("---")
     
-    # Số liệu KPIs nhanh
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Tổng Doanh Thu", "R$ 16.83M", "+5.2%")
     col2.metric("Tổng Đơn Hàng", "99.4K đơn", "+12.8%")
@@ -92,17 +96,15 @@ if selected_tab == "📈 Tổng quan kinh doanh":
     
     st.markdown("---")
     
-    # Chia bố cục 2 cột cho Biểu đồ tròn và Bảng Top 10
-    left_col, right_col = st.columns([4, 6]) # Cột phải rộng hơn để hiện bảng dữ liệu
+    left_col, right_col = st.columns([4, 6])
     
     with left_col:
         st.markdown("#### 💳 Tỷ Lệ Phương Thức Thanh Toán")
         df_pay = get_payment_data()
-        # Biểu đồ tròn trực quan bằng Plotly
         fig_pie = px.pie(
             df_pay, values='Giá trị (R$)', names='Phương thức',
             color_discrete_sequence=px.colors.sequential.RdBu,
-            hole=0.4 # Tạo biểu đồ Donut cho hiện đại
+            hole=0.4
         )
         fig_pie.update_layout(margin=dict(t=20, b=20, l=0, r=0), height=350)
         st.plotly_chart(fig_pie, use_container_width=True)
@@ -110,8 +112,6 @@ if selected_tab == "📈 Tổng quan kinh doanh":
     with right_col:
         st.markdown("#### 🏆 Top 10 Danh Mục Doanh Thu Cao Nhất")
         df_cat = get_top_categories()
-        
-        # Hiển thị bảng dữ liệu được format đẹp mắt
         st.dataframe(
             df_cat.set_index("Hạng"),
             column_config={
@@ -122,8 +122,6 @@ if selected_tab == "📈 Tổng quan kinh doanh":
             height=380
         )
 
-
-
 elif selected_tab == "🚚 Quản lý vận chuyển":
     st.markdown("<h1 style='color:#1E3A8A;'>🚚 Quản Lý & Phân Tích Vận Chuyển</h1>", unsafe_allow_html=True)
     st.markdown("---")
@@ -131,14 +129,40 @@ elif selected_tab == "🚚 Quản lý vận chuyển":
     st.markdown("#### 🗺️ Bản Đồ Nhiệt Mật Độ Giao Hàng (Mô phỏng Brazil khu vực Đông Nam)")
     st.markdown("*Khu vực tập trung mật độ đơn hàng cao nhất tại các bang như SP, RJ, MG.*")
     
-    # Lấy dữ liệu tọa độ địa lý
     df_gps = get_delivery_gps()
-    
-    # Hiển thị Bản đồ nhiệt (Map) tích hợp sẵn của Streamlit
     st.map(df_gps, zoom=4, use_container_width=True)
 
 elif selected_tab == "⭐ Phân tích phản hồi":
     st.markdown("<h1 style='color:#1E3A8A;'>⭐ Đánh Giá & Phản Hồi Từ Khách Hàng</h1>", unsafe_allow_html=True)
     st.markdown("---")
-    st.info("Khu vực tích hợp AI Prompts đang chờ cấu hình khóa API...")
-
+    
+    # KHU VỰC TÍCH HỢP AI
+    st.markdown("#### 🤖 Trợ lý AI Phân tích Vận hành (COO)")
+    st.info("Trợ lý Llama 3 sẽ trực tiếp truy xuất Data Warehouse để tìm ra nguyên nhân gốc rễ của các đánh giá tiêu cực và đề xuất chiến lược vận hành.")
+    
+    # Tạo nút bấm lớn, nổi bật
+    if st.button("🚀 KÍCH HOẠT AI PHÂN TÍCH CHUYÊN SÂU", use_container_width=True):
+        # Hiển thị vòng xoay chờ đợi chuyên nghiệp
+        with st.spinner("Đang kết nối MotherDuck & Suy luận chiến lược..."):
+            try:
+                # Gọi hàm AI từ file ecommerce_agent.py
+                insight_result = get_coo_ai_insights()
+                st.success("✅ Phân tích hoàn tất!")
+                
+                # Hiển thị kết quả trong một khung xám để nổi bật
+                with st.container():
+                    st.markdown("""
+                    <style>
+                    .ai-box {
+                        background-color: #F1F5F9;
+                        padding: 25px;
+                        border-radius: 10px;
+                        border-left: 5px solid #1E3A8A;
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown(f'<div class="ai-box">\n\n{insight_result}\n\n</div>', unsafe_allow_html=True)
+                    
+            except Exception as e:
+                st.error(f"❌ Đã xảy ra lỗi hệ thống: {e}")
