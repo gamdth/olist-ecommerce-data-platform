@@ -1,6 +1,7 @@
 import duckdb
 import os
 import pandas as pd
+import streamlit as st
 from groq import Groq
 from dotenv import load_dotenv
 
@@ -8,13 +9,17 @@ def get_coo_ai_insights():
     """
     Hàm kết nối MotherDuck, lấy dữ liệu từ Data Marts và gọi Llama 3 phân tích
     """
-    # Lấy API key từ file .env
-    load_dotenv()
-    md_token = os.getenv("MOTHERDUCK_TOKEN")
-    groq_key = os.getenv("GROQ_API_KEY")
+    # Xử lý thông minh: Ưu tiên lấy Key trên Cloud trước, nếu không có mới tìm file .env ở máy
+    try:
+        md_token = st.secrets["MOTHERDUCK_TOKEN"]
+        groq_key = st.secrets["GROQ_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        load_dotenv()
+        md_token = os.getenv("MOTHERDUCK_TOKEN")
+        groq_key = os.getenv("GROQ_API_KEY")
 
     if not md_token or not groq_key:
-        return "❌ Lỗi: Thiếu MOTHERDUCK_TOKEN hoặc GROQ_API_KEY trong file .env!"
+        return "❌ Lỗi: Không tìm thấy MOTHERDUCK_TOKEN hoặc GROQ_API_KEY ở cả Cloud và Local!"
 
     try:
         # 1. KẾT NỐI VÀ TRÍCH XUẤT DỮ LIỆU TỪ MOTHERDUCK
