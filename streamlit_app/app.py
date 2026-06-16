@@ -131,10 +131,38 @@ elif selected_tab == "🚚 Quản lý vận chuyển":
     
     df_gps = get_delivery_gps()
     st.map(df_gps, zoom=4, use_container_width=True)
+    # Chèn đoạn này vào dưới câu lệnh st.map(df_gps) trong tab Quản lý vận chuyển
+    st.markdown("---")
+    left_chart, right_space = st.columns([5, 5])
+    
+    with left_chart:
+        st.markdown("#### 🚨 Phân Tích Trạng Thái Giao Hàng Trễ")
+        st.markdown("*Tỷ lệ đơn hàng bị giao trễ so với thời gian dự kiến của nhà bán hàng Olist.*")
+        
+        # Giả lập dữ liệu trạng thái giao hàng chuẩn
+        df_delivery_status = pd.DataFrame({
+            "Trạng thái": ["Đúng hạn (On-time)", "Bị trễ hạn (Delayed)"],
+            "Số lượng đơn": [91740, 7660]
+        })
+        
+        # Vẽ biểu đồ tròn phân tích tỷ lệ trễ bằng Plotly Express
+        fig_delay = px.pie(
+            df_delivery_status, 
+            values='Số lượng đơn', 
+            names='Trạng thái',
+            color='Trạng thái',
+            # Gán màu Xanh lá cho Đúng hạn và màu Đỏ nổi bật cho đơn hàng bị Trễ
+            color_discrete_map={'Đúng hạn (On-time)': '#22C55E', 'Bị trễ hạn (Delayed)': '#EF4444'},
+            hole=0.4
+        )
+        fig_delay.update_layout(margin=dict(t=20, b=20, l=0, r=0), height=350)
+        st.plotly_chart(fig_delay, use_container_width=True)
 
 elif selected_tab == "⭐ Phân tích phản hồi":
     st.markdown("<h1 style='color:#1E3A8A;'>⭐ Đánh Giá & Phản Hồi Từ Khách Hàng</h1>", unsafe_allow_html=True)
     st.markdown("---")
+
+
     
     # KHU VỰC TÍCH HỢP AI
     st.markdown("#### 🤖 Trợ lý AI Phân tích Vận hành (COO)")
