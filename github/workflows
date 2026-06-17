@@ -23,7 +23,6 @@ jobs:
 
       - name: Chạy script lấy dữ liệu
         env:
-          # Các biến bảo mật này bạn sẽ cài đặt trong phần Settings > Secrets của Repo GitHub
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
           MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
